@@ -66,87 +66,50 @@ This is the correct behavior for a normal web app and avoids fake or unsafe auto
 - Environment config: .env
 - Project base: GitHub-ready repository structure
 
-## Run locally
+## Run locally on Windows
 
-1. Install dependencies:
+The included `launcher.bat` is the recommended Windows startup command. It:
 
-   npm install
+1. Changes to the project directory.
+2. Opens an Ollama window and runs `ollama run llama3.2`.
+3. Waits three seconds.
+4. Opens a second window, installs npm dependencies, and runs `npm run dev`.
 
-2. Start Ollama locally and make sure a model is available, such as:
+Before the first launch:
 
-   ollama pull llama3.2
+- Install Node.js and make sure `npm` is available on `PATH`.
+- Install Ollama and make sure the `llama3.2` model is available with `ollama pull llama3.2`.
+- Copy `.env.example` to `.env` and adjust the local values if needed.
 
-3. Start the app:
+Double-click `launcher.bat` or run it from a Command Prompt. Keep both command windows open while using the app. The Vite frontend is normally available at `http://localhost:5173` and the API at `http://localhost:3001`.
 
-   npm run dev
+The launcher runs `npm install` every time, so startup can take longer when dependencies need to be installed. To start the services manually instead, run:
 
-This starts both the backend and frontend together.
+```bash
+npm install
+npm run dev
+```
+
+The backend can still generate a local fallback review when Ollama is unavailable, but the Ollama window is required for model-generated drafts.
 
 ## Quick start checklist
 
 - [ ] Install Node.js
 - [ ] Install dependencies with `npm install`
-- [ ] Start Ollama
-- [ ] Pull a model such as `llama3.2`
+- [ ] Install Ollama and pull `llama3.2`
 - [ ] Copy `.env.example` to `.env` and set your local values
-- [ ] Run `npm run dev`
+- [ ] Run `launcher.bat` on Windows, or use the manual commands above
 - [ ] Open the local frontend URL shown in the terminal
 - [ ] Test the review flow end to end
-
-## GitHub repository setup
-
-```bash
-git init
-git add .
-git commit -m "Initial review flow prototype"
-git branch -M main
-git remote add origin <your-repository-url>
-git push -u origin main
-```
-
-## Environment variables
-
-Create a .env file based on .env.example.
-
-Key values:
-
-- PORT=3001
-- OLLAMA_BASE_URL=http://localhost:11434
-- OLLAMA_MODEL=llama3.2
-- RESTAURANT_NAME=Your Place Name
-- VITE_RESTAURANT_NAME=Your Place Name
-- VITE_GOOGLE_REVIEW_URL=https://maps.google.com/your-place-review-link
-- VITE_GOOGLE_CLIENT_ID=
 
 ## Project structure
 
 - src/ — React app UI
 - server/ — Express API for AI review generation
+- launcher.bat — Windows startup script for Ollama, the API, and Vite
 - .env.example — environment template
 - IMPLEMENTATION_PLAN.md — product and technical implementation plan
 - package.json — scripts and dependencies
-
-## GitHub-ready setup
-
-The repository is structured with a GitHub-friendly layout and ignores generated/local files via .gitignore.
-
-Standard GitHub flow:
-
-- git init
-- git add .
-- git commit -m "Initial review flow prototype"
-- git branch -M main
-- git remote add origin <your-repo-url>
-- git push -u origin main
-
-## Future upgrades
-
-Possible next steps after the current free prototype:
-
-- add a browser extension for one-click paste into Google Maps review fields
-- add Google OAuth only if a valid Google client ID is later provided
-- add dashboard and analytics later, outside the current scope
-- extend the workflow to restaurants, societies, or service businesses
 
 ## License
 

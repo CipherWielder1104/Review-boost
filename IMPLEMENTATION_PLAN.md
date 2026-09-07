@@ -192,15 +192,29 @@ The current stack is free to run locally:
 
 The only user-level cost might be the user’s existing Google account, which is free to access.
 
+### 7.5 Windows launcher
+
+`launcher.bat` is the supported Windows startup path for the local prototype. It:
+
+1. Changes the working directory to the folder containing the batch file.
+2. Opens a command window running `ollama run llama3.2`.
+3. Waits three seconds for Ollama to start.
+4. Opens a second command window that runs `npm install && npm run dev`.
+
+The launcher assumes Node.js (`npm.cmd`) and Ollama are available on `PATH`, and that the `llama3.2` model has been pulled. It checks for Node.js and Ollama before opening the service windows. It does not check whether the Ollama model is ready, open the browser, or verify API health; both command windows must remain open while the app is in use.
+
+The manual equivalent is `npm install` followed by `npm run dev`. The backend defaults to port `3001`, the Vite frontend defaults to port `5173`, and `.env` can override the backend settings.
+
 ---
 
 ## 8. Project folder structure
 
 - src/ — frontend app and UI flow
 - server/ — backend API that calls Ollama
-- .env — local environment configuration
+- .env — local environment configuration (created from `.env.example`)
 - .env.example — environment template
 - .gitignore — ignores local and generated files
+- launcher.bat — Windows startup script for the local services
 - IMPLEMENTATION_PLAN.md — project architecture and workflow plan
 - README.md — GitHub-facing project overview
 - package.json — scripts and dependencies
