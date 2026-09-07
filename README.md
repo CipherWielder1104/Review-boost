@@ -4,21 +4,7 @@ A local, free, mobile-first AI review flow for businesses and residential commun
 
 ## System design workflow
 
-```mermaid
-flowchart TD
-    A[QR / place link] --> B[Landing screen]
-    B --> C[Rate experience]
-    C --> D[Optional feedback]
-    D --> E[Local API]
-    E --> F[Ollama generates draft]
-    F --> G[Review preview]
-    G --> H[User edits review]
-    H --> I[Approval checkbox]
-    I --> J[Copy to clipboard]
-    J --> K[Open Google Maps]
-    K --> L[User pastes review]
-    L --> M[Post on Google]
-```
+![ReviewBoost review flow diagram](reviewboost-flow.png)
 
 ## What this app does
 
