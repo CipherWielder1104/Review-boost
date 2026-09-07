@@ -1,6 +1,6 @@
-# Restaurant Review AI Flow
+# ReviewCraft
 
-A local, free, mobile-first review flow for a business or society place, built as a QR-to-review prototype. It captures a customer rating, optionally collects feedback, runs a local AI review generation step, requires user approval, and then opens the relevant Google Maps review page so the user can publish manually.
+A local, free, mobile-first AI review flow for businesses and residential communities. It captures resident/customer feedback, generates an AI draft locally, allows user editing and approval, and seamlessly redirects to the target Google Maps review page.
 
 ## System design workflow
 
