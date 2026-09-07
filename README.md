@@ -4,7 +4,7 @@ A local, free, mobile-first AI review flow for businesses and residential commun
 
 ## System design workflow
 
-![ReviewBoost review flow diagram](reviewboost-flow.png)
+<img src="reviewboost-flow.png" alt="ReviewBoost review flow diagram" width="320">
 
 ## What this app does
 
@@ -102,3 +102,9 @@ For local security, the API accepts browser requests only from the configured `C
 ## License
 
 This project is provided as a local prototype and is not tied to any paid service or subscription.
+
+## Actual review workflow
+
+| 1. Start a review | 2. Rate the experience | 3. Review the AI-generated draft |
+| --- | --- | --- |
+| <img src="image1.jpeg" alt="ReviewBoost landing screen" width="320"> | <img src="image2.jpeg" alt="ReviewBoost rating screen" width="320"> | <img src="image3.jpeg" alt="ReviewBoost generated review screen" width="320"> |
