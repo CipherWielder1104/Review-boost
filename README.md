@@ -1,4 +1,4 @@
-# ReviewCraft
+# ReviewBoost
 
 A local, free, mobile-first AI review flow for businesses and residential communities. It captures resident/customer feedback, generates an AI draft locally, allows user editing and approval, and seamlessly redirects to the target Google Maps review page.
 
