@@ -10,9 +10,57 @@ const restaurantName = process.env.RESTAURANT_NAME || 'Sunder Sahawas Phase 1'
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434'
 const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.2'
 const googleReviewUrl = process.env.GOOGLE_REVIEW_URL || 'https://www.google.com/maps/place/Sunder+Sahawas+Phase+1/@18.4734513,73.8143519,17z/data=!4m8!3m7!1s0x3bc29566cf18601d:0x243f9ab233bc3397!8m2!3d18.4734513!4d73.8143519!9m1!1b1!16s%2Fg%2F1jkvgnxc1?entry=ttu&g_ep=EgoyMDI2MDkwMi4wIKXMDSoASAFQAw%3D%3D'
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+)
+const requestLog = new Map()
+const requestLimit = 10
+const requestWindowMs = 60 * 1000
+const maxCommentLength = 2000
+const maxPlaceNameLength = 120
+const unsafeContentPattern = /<script\b|javascript:|ignore (?:all|previous) instructions|system prompt/i
 
-app.use(cors())
-app.use(express.json())
+app.disable('x-powered-by')
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true)
+    }
+
+    return callback(new Error('Origin is not allowed'))
+  },
+}))
+app.use(express.json({ limit: '16kb' }))
+
+function isRateLimited(ipAddress) {
+  const now = Date.now()
+  const recentRequests = (requestLog.get(ipAddress) || []).filter(
+    (timestamp) => now - timestamp < requestWindowMs,
+  )
+
+  recentRequests.push(now)
+  requestLog.set(ipAddress, recentRequests)
+
+  return recentRequests.length > requestLimit
+}
+
+function normalizeInput(value, maxLength) {
+  return Array.from(String(value || ''))
+    .filter((character) => {
+      const codePoint = character.charCodeAt(0)
+      return codePoint >= 32 && codePoint !== 127
+    })
+    .join('')
+    .trim()
+    .slice(0, maxLength)
+}
+
+function containsUnsafeContent(value) {
+  return unsafeContentPattern.test(value)
+}
 
 function buildPrompt({ rating, comment, placeName }) {
   const normalizedComment = comment?.trim() || ''
@@ -75,13 +123,13 @@ async function generateReviewWithOllama({ rating, comment, placeName }) {
   }
 
   const data = await response.json()
-  const text = data?.response || ''
+  const text = normalizeInput(data?.response, maxCommentLength)
 
-  if (!text || text.trim().length < 10) {
+  if (!text || text.length < 10 || containsUnsafeContent(text)) {
     throw new Error('Ollama returned an empty review')
   }
 
-  return text.trim()
+  return text
 }
 
 app.get('/api/health', (_req, res) => {
@@ -89,24 +137,34 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.post('/api/reviews/generate', async (req, res) => {
+  if (isRateLimited(req.ip)) {
+    return res.status(429).json({ message: 'Too many requests. Please try again in a minute.' })
+  }
+
   const { rating, comment = '', restaurantName: incomingRestaurantName } = req.body || {}
+  const normalizedComment = normalizeInput(comment, maxCommentLength)
+  const normalizedRestaurantName = normalizeInput(incomingRestaurantName || restaurantName, maxPlaceNameLength)
 
   if (!Number.isInteger(Number(rating)) || Number(rating) < 1 || Number(rating) > 5) {
     return res.status(400).json({ message: 'Rating must be an integer between 1 and 5.' })
   }
 
+  if (containsUnsafeContent(normalizedComment) || containsUnsafeContent(normalizedRestaurantName)) {
+    return res.status(400).json({ message: 'Please remove unsafe instructions or markup from the feedback.' })
+  }
+
   try {
     const review = await generateReviewWithOllama({
       rating: Number(rating),
-      comment: String(comment),
-      placeName: incomingRestaurantName || restaurantName,
+      comment: normalizedComment,
+      placeName: normalizedRestaurantName,
     })
 
     return res.json({ review, source: 'ollama', status: 'success' })
   } catch {
     const fallback = buildFallbackReview({
       rating: Number(rating),
-      comment: String(comment),
+      comment: normalizedComment,
     })
 
     return res.json({

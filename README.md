@@ -92,6 +92,8 @@ npm run dev
 
 The backend can still generate a local fallback review when Ollama is unavailable, but the Ollama window is required for model-generated drafts.
 
+For local security, the API accepts browser requests only from the configured `CORS_ORIGINS`, limits request and feedback sizes, and rate-limits review generation. This prototype has no user accounts and is intended to run locally; a public deployment still needs HTTPS, authentication, centralized rate limiting, and a production moderation service.
+
 ## Quick start checklist
 
 - [ ] Install Node.js
